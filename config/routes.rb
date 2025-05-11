@@ -12,6 +12,7 @@ Rails.application.routes.draw do
     namespace :v1 do
       resources :users, only: [] do
         resources :sleep_time_records, only: [:index, :create]
+        post :clock_in, to: "sleep_time_records#clock_in"
       end
       
     end

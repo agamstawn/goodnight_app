@@ -10,7 +10,7 @@ RSpec.describe "Api::V1::SleepTimeRecordsController", type: :request do
     end
   end
 
-  describe "GET /api/v1/users/:user_id/sleep_time_records?page_size=1000" do
+  describe "GET /api/v1/users/:user_id/sleep_time_records" do
     it "returns sleep records in descending order and handles high volume" do
       time_taken = Benchmark.realtime do
         get "/api/v1/users/#{user.id}/sleep_time_records?page_size=1000"
@@ -37,5 +37,38 @@ RSpec.describe "Api::V1::SleepTimeRecordsController", type: :request do
       puts "Response time for 1000 records: #{time_taken.round(3)}s"
     end
   end
-
+  
+  describe "POST /api/v1/users/:user_id/clock_in" do
+    context "when clocking in successfully" do
+      before do
+        post "/api/v1/users/#{user.id}/clock_in"
+      end
+      
+      it "creates a new sleep record with sleep_time set" do
+        expect(SleepTimeRecord.last.sleep_time).not_to be_nil
+      end
+      
+      it "does not set wake_time initially" do
+        expect(SleepTimeRecord.last.wake_time).to be_nil
+      end
+      
+      it "returns a created status" do
+        expect(response).to have_http_status(:created)
+      end
+    end
+    
+    context "when user does not exist" do
+      before do
+        post "/api/v1/users/9999/clock_in"
+      end
+      
+      it "returns a not found status" do
+        expect(response).to have_http_status(:not_found)
+      end
+      
+      it "returns an error message" do
+        expect(JSON.parse(response.body)).to include("error" => "User not found")
+      end
+    end
+  end
 end

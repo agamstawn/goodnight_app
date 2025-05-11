@@ -19,6 +19,19 @@ class Api::V1::SleepTimeRecordsController < ApplicationController
     end
   end
 
+  def clock_in
+    @user = User.find(params[:user_id])
+    sleep_record = @user.sleep_time_records.new(sleep_time: Time.current)
+    
+    if sleep_record.save
+      render json: sleep_record, status: :created
+    else
+      render json: { errors: sleep_record.errors.full_messages }, status: :unprocessable_entity
+    end
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: "User not found" }, status: :not_found
+  end
+
   private
 
   def set_user
