@@ -14,7 +14,10 @@ Rails.application.routes.draw do
         resources :sleep_time_records, only: [:index, :create]
         post :clock_in, to: "sleep_time_records#clock_in"
       end
-      
+
+      resources :follows, only: [:create] do
+        delete :destroy, on: :collection
+      end
     end
   end
 end
